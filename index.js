@@ -5,10 +5,32 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 const url = "https://www.instagram.com/";
+const filePath = process.env.DAY_PATH;
+const reelPath = process.env.REEL_PATH;
 const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
+// Function to read the number from the text file
+async function readNumberFromFile(filePath) {
+    try {
+        const data = await fs.readFileSync(filePath, 'utf8');
+        return parseInt(data.trim());
+    } catch (error) {
+        console.error("Error reading file:", error);
+        return null;
+    }
+}
+
+// Function to write the number to the text file
+async function writeNumberToFile(filePath, number) {
+    try {
+        await fs.writeFileSync(filePath, number.toString());
+    } catch (error) {
+        console.error("Error writing file:", error);
+    }
+}
+
 const dailyBot = async () => {
-  const browser = await puppeteer.launch({ headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ headless: "new", args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
   await page.goto(url);
   console.log("Opening");
@@ -16,7 +38,7 @@ const dailyBot = async () => {
   await page.screenshot({ path: "test.png" });
 
   //!Login function
-  let file = fs.readFileSync("json/cookies.json", "utf8");
+  let file = fs.readFileSync("json/atomic.json", "utf8");
   let cookies;
   if (!file) {
     //Login to the instagram
@@ -68,7 +90,7 @@ const dailyBot = async () => {
     page.waitForFileChooser(),
     page.click("._acap"), // some button that triggers file selection
   ]);
-  const reelpath = "E:/WebProjects/InstagramBOT/DailyBot/I_am_Atomic.mp4";
+  const reelpath = reelPath;
   await fileChooser.accept([reelpath]);
   console.log("Files accepted");
 
@@ -105,13 +127,19 @@ const dailyBot = async () => {
   await page.waitForSelector('[aria-label="Write a caption..."]');
   console.log("Found and waited for caption dom");
 
-  const caption = `Day 2 of I am Atomic⚛️
+  let number = await readNumberFromFile(filePath);
+
+  const caption = `Day ${number} of I am Atomic⚛️
 
                     𝙏𝙖𝙜𝙨 🏷️
                     #animeworld #animefan #animeedit #animeedits 
                     #animeboy #animes #animefans`;
 
   await page.type('[aria-label="Write a caption..."]', `${caption}`);
+
+  number++
+
+  await writeNumberToFile(filePath, number);
 
   await wait(1000);
   await page.click("._ac7b._ac7d");
