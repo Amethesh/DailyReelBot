@@ -7,6 +7,7 @@ dotenv.config();
 const url = "https://www.instagram.com/";
 const filePath = process.env.DAY_PATH;
 const reelPath = process.env.REEL_PATH;
+const cookiesPath = process.env.COOKIES_PATH;
 const wait = (ms) => new Promise((res) => setTimeout(res, ms));
 
 // Function to read the number from the text file
@@ -38,7 +39,7 @@ const dailyBot = async () => {
   await page.screenshot({ path: "test.png" });
 
   //!Login function
-  let file = fs.readFileSync("json/atomic.json", "utf8");
+  let file = fs.readFileSync(cookiesPath, "utf8");
   let cookies;
   if (!file) {
     //Login to the instagram
